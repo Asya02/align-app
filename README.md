@@ -1,6 +1,6 @@
 # ALIGN Eval Frontend
 
-This is the frontend code for [ALIGN Eval](https://aligneval.com), a gamified platform to help you build and optimize LLM evaluators. Built with [Next.js](https://nextjs.org) and bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is the frontend code for [ALIGN Eval](https://aligneval.com), a prototype game to help you build and optimize LLM evaluators. Read about the workflow and how it was built [here](https://eugeneyan.com/writing/aligneval/).
 
 ## What is ALIGN Eval?
 
