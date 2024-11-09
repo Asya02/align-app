@@ -20,7 +20,7 @@ export const ProgressBar = ({ current }: ProgressBarProps) => {
   } else if (current >= midOptimizationPoint) {
     barColor = 'bg-gradient-to-r from-green-500 to-blue-400 transition duration-300 ease-in-out animate-pulse relative overflow-hidden';
     messageColor = 'text-blue-700';
-    message = `Almost at optimization model! Just label ${MIN_LABELS_FOR_OPTIMIZATION - current} more! 🚀`;
+    message = `Almost at optimization mode! Just label ${MIN_LABELS_FOR_OPTIMIZATION - current} more! 🚀`;
   } else if (current >= MIN_LABELS_FOR_EVALUATION) {
     barColor = 'bg-green-500';
     messageColor = 'text-green-700';

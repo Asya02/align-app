@@ -119,7 +119,7 @@ export default function OptimizePage() {
             height={28}
             className="mr-2"
           />
-          ALIGN Eval: Optimization Metrics
+          AlignEval: Optimization Metrics
           <button
             onClick={() => setShowInfoModal(true)}
             className="ml-2 text-gray-500 hover:text-gray-700"
@@ -136,7 +136,7 @@ export default function OptimizePage() {
         </h1>
       </div>
       <h2 className="text-gray-600 -mt-2 mb-4">
-        ⚠️ Optimization mode is <strong>currently in beta</strong> and does not reliably improve the original LLM-evaluator. ⚠️
+        ⚠️ Optimization mode is a <strong>beta demo</strong> and does not always improve metrics within 10 trials. ⚠️
       </h2>
 
       <OptimizationInfoModal 

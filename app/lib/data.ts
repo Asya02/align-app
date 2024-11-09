@@ -87,7 +87,7 @@ export async function fetchMetrics(tableName: string) {
         split_type,
         evaluation_fields,
         evaluation_model
-      FROM ${metricsTable}
+      FROM "${metricsTable}"
       ORDER BY run_number
     `);
     return rows;
@@ -109,7 +109,7 @@ export async function fetchRunRowCount(tableName: string, runNumber: string): Pr
   const runTable = `${tableName}_hpo_run${runNumber}`;
 
   try {
-    const result = await db.get(`SELECT COUNT(*) as count FROM ${runTable}`);
+    const result = await db.get(`SELECT COUNT(*) as count FROM "${runTable}"`);
     return result?.count as number | null;
   } catch (error) {
     if (error instanceof Error && error.message.includes('relation') && error.message.includes('does not exist')) {

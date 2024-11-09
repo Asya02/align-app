@@ -8,7 +8,7 @@ import { getTableName } from '@/app/lib/utils';
 import { MAX_TRIALS } from '@/app/lib/constants';
 import type { Eval } from '@/app/lib/definitions';
 import { FloatingMetrics, FloatingLabeledSamples } from '@/app/components/index/floating';
-import { InfoModal, CsvUploadInstructions, LabelingModeInstructions, EvaluationModeInstructions, OptimizationModeInstructions } from '@/app/components/index/instructions';
+import { InfoModal, InfoModalMobile, CsvUploadInstructions, LabelingModeInstructions, EvaluationModeInstructions, OptimizationModeInstructions } from '@/app/components/index/instructions';
 import { FileUploadButton, DownloadButton, DeleteButton } from '@/app/components/index/buttons';
 import { 
   PromptTextArea, 
@@ -22,6 +22,7 @@ import { Table } from '@/app/components/index/table';
 import { computeMetrics } from '@/app/lib/metrics';
 import { FloatingSiteMetrics } from '@/app/components/index/floating';
 import Image from 'next/image';
+import { useMediaQuery } from 'react-responsive';
 
 // Add this with other constants at the top
 const MAX_UPLOAD_ROWS = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_ROWS);
@@ -30,9 +31,7 @@ export default function Home() {
   const MIN_LABELS_FOR_EVALUATION = Number(process.env.NEXT_PUBLIC_MIN_LABELS_FOR_EVALUATION);
   const MIN_LABELS_FOR_OPTIMIZATION = Number(process.env.NEXT_PUBLIC_MIN_LABELS_FOR_OPTIMIZATION);
   const POLL_INTERVAL = 1000; // milliseconds
-  const defaultPrompt = `Evaluate if the output summary contains factual inconsistencies with respect to the input news article.
-
-If the output is factually inconsistent with the input, return the prediction of 1. Else, return the prediction of 0.`
+  const defaultPrompt = "Check if the output has hallucinations. If so, return the prediction of 1. Else, return 0."
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,7 +43,7 @@ If the output is factually inconsistent with the input, return the prediction of
   const editableRef = useRef<HTMLDivElement>(null)
 
   const [showEvaluationControls, setShowEvaluationControls] = useState(false);
-  const [model, setModel] = useState<'gpt-4o-mini' | 'claude-3-haiku-20240307'>('gpt-4o-mini');
+  const [model, setModel] = useState<'gpt-4o-mini' | 'claude-3-5-haiku-20241022' | 'claude-3-haiku-20240307'>('gpt-4o-mini');
   const [evaluationFields, setEvaluationFields] = useState<'inputAndOutput' | 'outputOnly'>('inputAndOutput');
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [evaluationAlertShown, setEvaluationAlertShown] = useState(false);
@@ -61,6 +60,8 @@ If the output is factually inconsistent with the input, return the prediction of
     }
     return true;
   });
+
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   // Load data for the table
   const fetchData = useCallback(async (newFileName?: string) => {
@@ -521,7 +522,7 @@ If the output is factually inconsistent with the input, return the prediction of
               height={28}
               className="mr-2"
             />
-            ALIGN Eval: Assisted Labeling to Improve GeneratioN of Evals
+            AlignEval: Making Evals Easy, Fun, and Semi-Automated
             <button
               onClick={(e) => {
                 e.stopPropagation(); // Prevent the h1 click handler from firing
@@ -541,11 +542,21 @@ If the output is factually inconsistent with the input, return the prediction of
           </h1>
         </div>
 
-        <InfoModal 
-          isOpen={isInfoModalOpen}
-          onClose={() => setIsInfoModalOpen(false)}
-          onDontShowAgain={handleDontShowAgain}
-        />
+        {isInfoModalOpen && (
+          isMobile ? (
+            <InfoModalMobile 
+              isOpen={isInfoModalOpen}
+              onClose={() => setIsInfoModalOpen(false)}
+              onDontShowAgain={handleDontShowAgain}
+            />
+          ) : (
+            <InfoModal 
+              isOpen={isInfoModalOpen}
+              onClose={() => setIsInfoModalOpen(false)}
+              onDontShowAgain={handleDontShowAgain}
+            />
+          )
+        )}
 
         {/* Floating components */}
         {metrics.sampleSize >= 1 && showEvaluationControls ? (

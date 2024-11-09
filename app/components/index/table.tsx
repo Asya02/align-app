@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Eval } from '@/app/lib/definitions';
+import { PencilIcon } from '@heroicons/react/24/outline';
 
 interface TableProps {
   data: Eval[];
@@ -118,17 +119,30 @@ export const Table = ({ data, handleCellEdit, handleCellUpdate, editingCell, edi
                       />
                     ) : key === 'prediction' ? (
                       <PredictionDisplay value={value} />
-                    ) : editingCell?.id === row.id && editingCell?.key === key ? (
-                      <div
-                        ref={editableRef}
-                        contentEditable
-                        onBlur={handleCellUpdate}
-                        className="outline-none border-b border-blue-500"
-                      />
+                    ) : key === 'explanation' ? (
+                      editingCell?.id === row.id && editingCell?.key === key ? (
+                        <div
+                          ref={editableRef}
+                          contentEditable
+                          onBlur={handleCellUpdate}
+                          className="outline-none border-b border-blue-500 min-h-[1.5em]"
+                          suppressContentEditableWarning={true}
+                        >
+                          {value}
+                        </div>
+                      ) : (
+                        <div 
+                          onClick={() => handleCellEdit(row.id, key, String(value))}
+                          className="group relative min-h-[1.5em] cursor-pointer"
+                        >
+                          <span>{value || '\u00A0'}</span>
+                          {value && ( // Only render PencilIcon if value exists
+                            <PencilIcon className="absolute bottom-1 right-1 h-5 w-5 text-blue-600" />
+                          )}
+                        </div>
+                      )
                     ) : (
-                      <div onClick={() => handleCellEdit(row.id, key, String(value))}>
-                        {value || '\u00A0'}
-                      </div>
+                      <div>{value || '\u00A0'}</div>
                     )}
                   </td>
                 ))}

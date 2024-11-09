@@ -7,10 +7,36 @@ import Script from 'next/script';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: "ALIGN Eval: Assisted Labeling to Improve GeneratioN of Evals",
-  description: "A prototype tool to help you label data, evaluate output, and optimize prompts.",
+  title: "AlignEval: Making Evals Easy, Fun, and Semi-Automated",
+  description: "A prototype tool/game to help you look at your data, label it, evaluate output, and optimize evaluators.",
   icons: {
     icon: '/favicon.svg',
+  },
+  openGraph: {
+    title: 'AlignEval: Making Evals Easy, Fun, and Semi-Automated',
+    description: 'A prototype tool/game to help you look at your data, label it, evaluate output, and optimize evaluators.',
+    url: 'https://aligneval.com',
+    siteName: 'AlignEval',
+    images: [{
+      url: 'https://aligneval.com/og-image.jpg',
+      secureUrl: 'https://aligneval.com/og-image.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'AlignEval: Upload, Label, Evaluate, Optimize',
+    }],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AlignEval: Making Evals Easy, Fun, and Semi-Automated',
+    description: 'A prototype tool/game to help you look at your data, label it, evaluate output, and optimize evaluators.',
+    creator: '@eugeneyan',
+    images: {
+      url: 'https://aligneval.com/og-image.jpg',
+      secureUrl: 'https://aligneval.com/og-image.jpg',
+      alt: 'AlignEval: Upload, Label, Evaluate, Optimize',
+    },
   },
 };
 
@@ -32,6 +58,19 @@ export default function RootLayout({
           </Suspense>
         </main>
         <Footer />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-44MQ54N7Q7"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-44MQ54N7Q7');
+          `}
+        </Script>
       </body>
     </html>
   );

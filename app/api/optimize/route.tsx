@@ -105,20 +105,20 @@ export async function GET(req: NextRequest) {
     const largestF1 = Math.max(...rows.map(row => row.f1 as number));
 
     if (largestRunNumber === MAX_TRIALS) {
-      rowCount = await fetchRunRowCount(tableName, '_test');
-      // console.log(`table: ${tableName}_hpo_run_test, rowCount: ${rowCount}`);
       message = `Ran ${largestRunNumber} trials! Evaluating on test set...`
-      return NextResponse.json({ results: rows, message, rowCount }, { status: 200 });
+      rowCount = await fetchRunRowCount(tableName, '_test');
+      const filteredRows = rows.filter(row => row.split_type !== 'all');
+      return NextResponse.json({ results: filteredRows, message, rowCount }, { status: 200 });
     } else if (largestF1 > 0.95) {
       message = `Optimization completed; dev F1 score > 0.95!`;
       rowCount = await fetchRunRowCount(tableName, '_test');
-      // console.log(`table: ${tableName}_hpo_run_test, rowCount: ${rowCount}`);
-      return NextResponse.json({ results: rows, message, rowCount }, { status: 200 });
+      const filteredRows = rows.filter(row => row.split_type !== 'all');
+      return NextResponse.json({ results: filteredRows, message, rowCount }, { status: 200 });
     } else if (largestRunNumber === MAX_TRIALS + 1) {
       message = `Optimization completed! Check metrics on test.`;
       rowCount = await fetchRunRowCount(tableName, '_test');
-      // console.log(`table: ${tableName}_hpo_run_test, rowCount: ${rowCount}`);
-      return NextResponse.json({ results: rows, message, rowCount }, { status: 200 });
+      const filteredRows = rows.filter(row => row.split_type !== 'all');
+      return NextResponse.json({ results: filteredRows, message, rowCount }, { status: 200 });
     }
 
     // Check if the next run table exists
@@ -139,8 +139,11 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Filter out all split
+    const filteredRows = rows.filter(row => row.split_type !== 'all');
+
     return NextResponse.json({
-      results: rows,
+      results: filteredRows,
       message,
       rowCount,
     });

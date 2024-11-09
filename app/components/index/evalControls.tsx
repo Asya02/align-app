@@ -14,7 +14,7 @@ export const PromptTextArea = ({ prompt, setPrompt }: PromptTextAreaProps) => (
       onChange={(e) => setPrompt(e.target.value)}
       placeholder="Enter evaluation prompt"
       className="w-full border-2 border-blue-500 rounded-lg p-3 text-gray-900 resize-vertical focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
-      rows={4}
+      rows={3}
     />
   </>
 );
@@ -25,17 +25,18 @@ interface EvaluationFieldsDropdownProps {
 }
 
 interface ModelFieldsDropdownProps {
-  model: 'claude-3-haiku-20240307' | 'gpt-4o-mini';
-  setModel: (model: 'claude-3-haiku-20240307' | 'gpt-4o-mini') => void;
+  model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini';
+  setModel: (model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini') => void;
 }
 
 export const ModelFieldsDropdown = ({ model, setModel }: ModelFieldsDropdownProps) => (
   <select
     value={model}
-    onChange={(e) => setModel(e.target.value as 'claude-3-haiku-20240307' | 'gpt-4o-mini')}
+    onChange={(e) => setModel(e.target.value as 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini')}
     className="border-2 border-blue-500 rounded-lg p-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
   >
     <option value="claude-3-haiku-20240307">claude-3-haiku</option>
+    <option value="claude-3-5-haiku-20241022">claude-3.5-haiku</option>
     <option value="gpt-4o-mini">gpt-4o-mini</option>
   </select>
 );

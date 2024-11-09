@@ -156,7 +156,7 @@ export const OptimizationInfoModal = ({ isOpen, onClose, onDontShowAgain, showDo
               <p>
                 Due to small sample sizes, your spell&apos;s power might vary between dev and test. A prompt that shows great power in the arcane laboratory might not maintain its strength in the proving grounds due to the <span className="relative">
                   <span className="relative">curse of overfitting</span>
-                  <span className="absolute bottom-[-5px] left-0 w-full h-[4px]" style={{ 
+                  <span className="absolute bottom-[-3px] left-0 w-full h-[4px]" style={{ 
                     background: '#ff0000',
                     transform: 'rotate(0.7deg) skew(45deg)',
                     opacity: 0.9
