@@ -1,6 +1,6 @@
-import sqlite3 from 'sqlite3'
-import { open, Database as SQLiteDatabase } from 'sqlite'
-import { Pool, QueryResult } from 'pg'
+import { Pool, QueryResult } from 'pg';
+import { open, Database as SQLiteDatabase } from 'sqlite';
+import sqlite3 from 'sqlite3';
 
 // Define a generic type for database rows
 type DbRow = Record<string, string | number | boolean | null>;
@@ -78,16 +78,22 @@ class PostgresWrapper implements DbWrapper {
 }
 
 export async function getDb(): Promise<DbWrapper> {
-  if (process.env.RAILWAY_ENVIRONMENT) {
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
-    return new PostgresWrapper(pool);
-  } else {
-    const db = await open({
-      filename: '../database.sqlite',
-      driver: sqlite3.Database
-    });
-    return new SQLiteWrapper(db);
+  // Use SQLite by default, PostgreSQL only if explicitly configured
+  if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('postgres://')) {
+    try {
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+      });
+      return new PostgresWrapper(pool);
+    } catch (error) {
+      console.error('Failed to connect to PostgreSQL, falling back to SQLite:', error);
+    }
   }
+
+  // Default to SQLite
+  const db = await open({
+    filename: './database.sqlite',
+    driver: sqlite3.Database
+  });
+  return new SQLiteWrapper(db);
 }

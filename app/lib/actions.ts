@@ -9,16 +9,12 @@ export async function createEvalTable(fileName: string, headers: string[]) {
   const tableName = getTableName(fileName);
 
   try {
-    // Check if the table already exists
+    // Check if the table already exists (SQLite syntax)
     const tableExistsResult = await db.get(
-      `SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public'
-        AND table_name = $1
-      )`,
+      `SELECT name FROM sqlite_master WHERE type='table' AND name=?`,
       [tableName]
     );
-    const tableExists = tableExistsResult?.exists || false;
+    const tableExists = !!tableExistsResult;
 
     if (tableExists) {
       return { tableExists: true, tableName };
@@ -56,9 +52,9 @@ export async function insertEvals(fileName: string, headers: string[], records: 
   const tableName = getTableName(fileName);
 
   try {
-    const placeholders = ['$1', ...headers.map((_, i) => `$${i + 2}`)];
+    const placeholders = ['?', ...headers.map(() => '?')];
     const columnsToInsert = ['row_number', ...headers];
-    
+
     // Only add 'explanation' and 'prediction' to the columns and placeholders if they don't exist
     if (!headers.includes('explanation')) {
       columnsToInsert.push('explanation');
@@ -70,7 +66,7 @@ export async function insertEvals(fileName: string, headers: string[], records: 
     }
 
     const insertQuery = `INSERT INTO "${tableName}" (${columnsToInsert.map(c => `"${c}"`).join(',')}) VALUES (${placeholders.join(',')})`;
-    
+
     const dataToInsert = records.slice(0, MAX_UPLOAD_ROWS); // Take up to MAX_UPLOAD_ROWS rows
 
     for (let i = 0; i < dataToInsert.length; i++) {
@@ -107,9 +103,9 @@ export async function updateEvalRow(fileName: string, id: number, updates: Recor
   const tableName = getTableName(fileName);
 
   try {
-    const updateFields = Object.keys(updates).map((key, index) => `"${key}" = $${index + 2}`).join(', ');
-    const query = `UPDATE "${tableName}" SET ${updateFields} WHERE id = $1`;
-    const values = [id, ...Object.values(updates)];
+    const updateFields = Object.keys(updates).map((key, index) => `"${key}" = ?`).join(', ');
+    const query = `UPDATE "${tableName}" SET ${updateFields} WHERE id = ?`;
+    const values = [...Object.values(updates), id];
 
     await db.run(query, values);
     return { success: true, message: 'Row updated successfully' };
@@ -147,8 +143,8 @@ export async function insertExplanationPrediction(fileName: string, id: number, 
 
   const query = `
       UPDATE "${tableName}" 
-      SET "explanation" = $1, "prediction" = $2 
-      WHERE id = $3
+      SET "explanation" = ?, "prediction" = ? 
+      WHERE id = ?
   `;
 
   try {

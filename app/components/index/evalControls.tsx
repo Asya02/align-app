@@ -1,4 +1,3 @@
-import React from 'react';
 
 interface PromptTextAreaProps {
   prompt: string;
@@ -25,16 +24,17 @@ interface EvaluationFieldsDropdownProps {
 }
 
 interface ModelFieldsDropdownProps {
-  model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini';
-  setModel: (model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini') => void;
+  model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini' | 'GigaChat-2-Max';
+  setModel: (model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini' | 'GigaChat-2-Max') => void;
 }
 
 export const ModelFieldsDropdown = ({ model, setModel }: ModelFieldsDropdownProps) => (
   <select
     value={model}
-    onChange={(e) => setModel(e.target.value as 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini')}
+    onChange={(e) => setModel(e.target.value as 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini' | 'GigaChat-2-Max')}
     className="border-2 border-blue-500 rounded-lg p-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
   >
+    <option value="GigaChat-2-Max">GigaChat-2-Max</option>
     <option value="claude-3-haiku-20240307">claude-3-haiku</option>
     <option value="claude-3-5-haiku-20241022">claude-3.5-haiku</option>
     <option value="gpt-4o-mini">gpt-4o-mini</option>
@@ -58,7 +58,7 @@ interface EvaluateButtonProps {
 }
 
 export const EvaluateButton = ({ isEvaluating, onClick }: EvaluateButtonProps) => (
-  <button 
+  <button
     onClick={onClick}
     className={`${isEvaluating ? 'bg-gray-400 hover:bg-red-400' : 'bg-green-500 hover:bg-green-600'} text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105`}
   >
@@ -71,7 +71,7 @@ interface ClearEvaluationsButtonProps {
 }
 
 export const ClearEvaluationsButton = ({ onClick }: ClearEvaluationsButtonProps) => (
-  <button 
+  <button
     onClick={onClick}
     className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
   >
@@ -84,7 +84,7 @@ interface OptimizeButtonProps {
 }
 
 export const OptimizeButton = ({ onClick }: OptimizeButtonProps) => (
-  <button 
+  <button
     onClick={onClick}
     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 animate-pulse relative overflow-hidden"
   >

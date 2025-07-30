@@ -16,6 +16,7 @@
     "csv-parse": "^5.5.6",
     "csv-stringify": "^6.5.1",
     "file-saver": "^2.0.5",
+    "gigachat": "^0.0.16",
     "next": "14.2.13",
     "openai": "^4.63.0",
     "pg": "^8.13.0",

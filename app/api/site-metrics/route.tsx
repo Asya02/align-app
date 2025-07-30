@@ -1,16 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/app/lib/db'
+import { NextRequest, NextResponse } from 'next/server'
 
 // Initialize metrics table if it doesn't exist
 async function initializeMetricsTable() {
   const db = await getDb()
+
+  // Use SQLite-compatible SQL
   await db.run(`
     CREATE TABLE IF NOT EXISTS site_metrics (
-      id SERIAL PRIMARY KEY,
-      metric_name VARCHAR(50) NOT NULL,
-      metric_value BIGINT DEFAULT 0,
-      last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(metric_name)
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      metric_name TEXT NOT NULL UNIQUE,
+      metric_value INTEGER DEFAULT 0,
+      last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `)
 
@@ -28,9 +29,8 @@ async function initializeMetricsTable() {
 
   for (const metric of metrics) {
     await db.run(`
-      INSERT INTO site_metrics (metric_name, metric_value)
-      VALUES ($1, 0)
-      ON CONFLICT (metric_name) DO NOTHING
+      INSERT OR IGNORE INTO site_metrics (metric_name, metric_value)
+      VALUES (?, 0)
     `, [metric])
   }
 }
@@ -42,9 +42,9 @@ async function incrementMetric(metricName: string, incrementBy: number = 1) {
   await db.run(`
     UPDATE site_metrics 
     SET 
-      metric_value = metric_value + $1,
+      metric_value = metric_value + ?,
       last_updated = CURRENT_TIMESTAMP
-    WHERE metric_name = $2
+    WHERE metric_name = ?
   `, [incrementBy, metricName])
 }
 

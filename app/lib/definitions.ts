@@ -27,3 +27,5 @@ export type OptimizationResult = {
   evaluation_fields: string;
   evaluation_model: string;
 }
+
+export type ModelType = 'gpt-4o-mini' | 'claude-3-5-haiku-20241022' | 'claude-3-haiku-20240307' | 'GigaChat-2-Max';

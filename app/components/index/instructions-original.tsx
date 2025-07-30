@@ -18,7 +18,7 @@ export const InfoModal = ({ isOpen, onClose }: InfoModalProps) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
       onClick={handleOverlayClick}
     >
@@ -31,7 +31,7 @@ export const InfoModal = ({ isOpen, onClose }: InfoModalProps) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        
+
         <div className="prose">
           <p>
             ALIGN Eval is a prototype tool to help you build and optimize LLM-evaluators by <strong>aligning annotators to AI output</strong>, and <strong>aligning AI to annotator input</strong>.
@@ -39,7 +39,7 @@ export const InfoModal = ({ isOpen, onClose }: InfoModalProps) => {
           <p className="mt-4">
             Here&apos;s how it works:
           </p>
-          
+
           <ol className="list-decimal pl-5 space-y-2">
             <li>
               <strong>Upload:</strong> Start by uploading a dataset containing input-output pairs to evaluate.
@@ -85,7 +85,7 @@ export const CsvUploadInstructions = () => (
         <li><strong><code>1</code></strong>: Output <strong className="text-red-600">fails</strong> your evaluation criteria.</li>
       </ul>
       <li>Only the first {MAX_UPLOAD_ROWS} rows will be uploaded to the database.</li>
-      <li>To try it out, <a href="/data/fib50.csv" download className="text-blue-600 hover:text-blue-800 underline">download a sample csv</a> based on Factual Inconsistency Benchmark (<a href="https://huggingface.co/datasets/r-three/fib" className="text-blue-600 hover:text-blue-800 underline"target="_blank">details</a>).</li>
+      <li>To try it out, <a href="/data/fib50.csv" download className="text-blue-600 hover:text-blue-800 underline">download a sample csv</a> based on Factual Inconsistency Benchmark (<a href="https://huggingface.co/datasets/r-three/fib" className="text-blue-600 hover:text-blue-800 underline" target="_blank">details</a>).</li>
     </ul>
   </div>
 );
@@ -115,14 +115,14 @@ export const EvaluationModeInstructions = ({ minLabelsForOptimization }: Evaluat
     <h2 className="font-bold mb-2">Evaluation Mode</h2>
     <ul className="list-disc pl-5">
       <li>Enter your evaluator prompt below</li>
-      <li>Select the evaluation model: gpt-4o-mini, claude-3-haiku</li>
+      <li>Select the evaluation model: GigaChat-2-Max, gpt-4o-mini, claude-3-haiku</li>
       <li>Select the evaluation fields: input and output, output only</li>
       <li>Click the &quot;Evaluate&quot; button to run the LLM-evaluator on the input-output pairs.</li>
     </ul>
     <br />
     <p>
       To unlock <strong>Optimization mode</strong>, label and run evaluation on at least {minLabelsForOptimization} rows.
-    </p>    
+    </p>
   </div>
 );
 

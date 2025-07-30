@@ -1,27 +1,25 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { saveAs } from 'file-saver';
-import { Suspense } from 'react';
-import { getTableName } from '@/app/lib/utils';
+import { DeleteButton, DownloadButton, FileUploadButton } from '@/app/components/index/buttons';
+import {
+  ClearEvaluationsButton,
+  EvaluateButton,
+  EvaluationFieldsDropdown,
+  ModelFieldsDropdown,
+  OptimizeButton,
+  PromptTextArea
+} from '@/app/components/index/evalControls';
+import { FloatingLabeledSamples, FloatingMetrics, FloatingSiteMetrics } from '@/app/components/index/floating';
+import { CsvUploadInstructions, EvaluationModeInstructions, InfoModal, InfoModalMobile, LabelingModeInstructions, OptimizationModeInstructions } from '@/app/components/index/instructions';
+import { Table } from '@/app/components/index/table';
 import { MAX_TRIALS } from '@/app/lib/constants';
 import type { Eval } from '@/app/lib/definitions';
-import { FloatingMetrics, FloatingLabeledSamples } from '@/app/components/index/floating';
-import { InfoModal, InfoModalMobile, CsvUploadInstructions, LabelingModeInstructions, EvaluationModeInstructions, OptimizationModeInstructions } from '@/app/components/index/instructions';
-import { FileUploadButton, DownloadButton, DeleteButton } from '@/app/components/index/buttons';
-import { 
-  PromptTextArea, 
-  EvaluationFieldsDropdown, 
-  EvaluateButton, 
-  ClearEvaluationsButton, 
-  OptimizeButton, 
-  ModelFieldsDropdown 
-} from '@/app/components/index/evalControls';
-import { Table } from '@/app/components/index/table';
 import { computeMetrics } from '@/app/lib/metrics';
-import { FloatingSiteMetrics } from '@/app/components/index/floating';
+import { getTableName } from '@/app/lib/utils';
+import { saveAs } from 'file-saver';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
 // Add this with other constants at the top
@@ -43,7 +41,7 @@ export default function Home() {
   const editableRef = useRef<HTMLDivElement>(null)
 
   const [showEvaluationControls, setShowEvaluationControls] = useState(false);
-  const [model, setModel] = useState<'gpt-4o-mini' | 'claude-3-5-haiku-20241022' | 'claude-3-haiku-20240307'>('gpt-4o-mini');
+  const [model, setModel] = useState<'gpt-4o-mini' | 'claude-3-5-haiku-20241022' | 'claude-3-haiku-20240307' | 'GigaChat-2-Max'>('GigaChat-2-Max');
   const [evaluationFields, setEvaluationFields] = useState<'inputAndOutput' | 'outputOnly'>('inputAndOutput');
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [evaluationAlertShown, setEvaluationAlertShown] = useState(false);
@@ -51,7 +49,7 @@ export default function Home() {
 
   const [shouldFetchFromUrl, setShouldFetchFromUrl] = useState(true);
   const metrics = useMemo(() => computeMetrics(data), [data]);
-  const [siteMetrics, setSiteMetrics] = useState<{[key: string]: number}>({});
+  const [siteMetrics, setSiteMetrics] = useState<{ [key: string]: number }>({});
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(() => {
     // Check localStorage on initial render
     if (typeof window !== 'undefined') {
@@ -106,22 +104,22 @@ export default function Home() {
   const handleUpload = useCallback(async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
-  
+
     const response = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
     })
-  
+
     if (response.ok) {
       const result = await response.json()
       setFileName(file.name)
-      
+
       if (result.tableExists) {
         alert(`File "${file.name}" already exists. Displaying existing data.`)
       } else {
         alert(`File processed successfully. ${result.insertedRows} rows inserted (maximum of ${MAX_UPLOAD_ROWS}).`)
       }
-      
+
       await fetchData(file.name)
       router.push(`/?fileName=${encodeURIComponent(file.name)}`)
     } else {
@@ -250,7 +248,7 @@ export default function Home() {
 
     const response = await fetch(`/api/evaluate?fileName=${encodeURIComponent(fileName)}`)
     const { results: newResults, isEvaluationRunning } = await response.json()
-    
+
     // Update the existing data with new results
     setData(prevData => prevData.map(row => {
       const newResult = newResults.find((result: Eval) => result.id === row.id)
@@ -309,8 +307,8 @@ export default function Home() {
 
     const { id, key } = editingCell
     // If we're using the contentEditable div, get its text content
-    const newValue = editableRef.current 
-      ? editableRef.current.innerText 
+    const newValue = editableRef.current
+      ? editableRef.current.innerText
       : editingCell.value // Add this to the EditingCell type
 
     try {
@@ -352,10 +350,10 @@ export default function Home() {
     }
 
     // Show optimization alert when there are enough labels and predictions
-    if (validLabelCount >= MIN_LABELS_FOR_OPTIMIZATION && 
-        validPredictionCount >= MIN_LABELS_FOR_OPTIMIZATION && 
-        showEvaluationControls && 
-        !optimizationAlertShown) {
+    if (validLabelCount >= MIN_LABELS_FOR_OPTIMIZATION &&
+      validPredictionCount >= MIN_LABELS_FOR_OPTIMIZATION &&
+      showEvaluationControls &&
+      !optimizationAlertShown) {
       alert('Optimization mode unlocked! Scroll to the top and click "Optimize Prompt" to start optimization.');
       setOptimizationAlertShown(true);
     }
@@ -370,7 +368,7 @@ export default function Home() {
 
       // First, check if optimization has already been completed
       const checkResponse = await fetch(`/api/optimize?tableName=${encodeURIComponent(getTableName(fileName))}`);
-      
+
       if (checkResponse.ok) {
         const data = await checkResponse.json();
         if (data.results && data.results.length >= MAX_TRIALS) {
@@ -381,7 +379,7 @@ export default function Home() {
       } else if (!checkResponse.ok) {
         // If optimization hasn't started, redirect and start the process
         router.push(`/optimize?fileName=${encodeURIComponent(fileName)}`);
-        
+
         // Start the optimization process
         const startResponse = await fetch('/api/optimize', {
           method: 'POST',
@@ -472,7 +470,7 @@ export default function Home() {
         const response = await fetch('/api/site-metrics');
         if (response.ok) {
           const metrics = await response.json();
-          const metricsObject = metrics.reduce((acc: {[key: string]: number}, metric: { metric_name: string; metric_value: number }) => {
+          const metricsObject = metrics.reduce((acc: { [key: string]: number }, metric: { metric_name: string; metric_value: number }) => {
             acc[metric.metric_name] = metric.metric_value;
             return acc;
           }, {});
@@ -511,7 +509,7 @@ export default function Home() {
         )}
 
         <div className="flex items-center mb-4">
-          <h1 
+          <h1
             onClick={handleReset}
             className="text-3xl font-bold text-gray-900 flex items-center cursor-pointer hover:opacity-80"
           >
@@ -544,13 +542,13 @@ export default function Home() {
 
         {isInfoModalOpen && (
           isMobile ? (
-            <InfoModalMobile 
+            <InfoModalMobile
               isOpen={isInfoModalOpen}
               onClose={() => setIsInfoModalOpen(false)}
               onDontShowAgain={handleDontShowAgain}
             />
           ) : (
-            <InfoModal 
+            <InfoModal
               isOpen={isInfoModalOpen}
               onClose={() => setIsInfoModalOpen(false)}
               onDontShowAgain={handleDontShowAgain}
@@ -619,34 +617,34 @@ export default function Home() {
           <div className="mb-4">
             <PromptTextArea prompt={prompt} setPrompt={setPrompt} />
             <div className="mt-3 flex gap-2 items-center">
-              <ModelFieldsDropdown 
-                model={model} 
-                setModel={setModel} 
+              <ModelFieldsDropdown
+                model={model}
+                setModel={setModel}
               />
-              <EvaluationFieldsDropdown 
-                evaluationFields={evaluationFields} 
-                setEvaluationFields={setEvaluationFields} 
+              <EvaluationFieldsDropdown
+                evaluationFields={evaluationFields}
+                setEvaluationFields={setEvaluationFields}
               />
-              <EvaluateButton 
-                isEvaluating={isEvaluating} 
-                onClick={isEvaluating ? handleStopEvaluation : handleEvaluate} 
+              <EvaluateButton
+                isEvaluating={isEvaluating}
+                onClick={isEvaluating ? handleStopEvaluation : handleEvaluate}
               />
               {!isEvaluating && (
                 <ClearEvaluationsButton onClick={handleClearEvaluations} />
               )}
 
-              {showEvaluationControls && 
-               data.filter(row => row.label && row.label.trim() !== '').length >= MIN_LABELS_FOR_OPTIMIZATION && 
-               data.filter(row => row.prediction && row.prediction.trim() !== '').length >= MIN_LABELS_FOR_OPTIMIZATION && (
-                <OptimizeButton onClick={handleOptimize} />
-              )}
+              {showEvaluationControls &&
+                data.filter(row => row.label && row.label.trim() !== '').length >= MIN_LABELS_FOR_OPTIMIZATION &&
+                data.filter(row => row.prediction && row.prediction.trim() !== '').length >= MIN_LABELS_FOR_OPTIMIZATION && (
+                  <OptimizeButton onClick={handleOptimize} />
+                )}
             </div>
           </div>
         )}
 
-        <Table 
-          data={data} 
-          handleCellEdit={handleCellEdit} 
+        <Table
+          data={data}
+          handleCellEdit={handleCellEdit}
           handleCellUpdate={handleCellUpdate}
           editingCell={editingCell}
           editableRef={editableRef}

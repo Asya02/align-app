@@ -56,7 +56,7 @@ export const InfoModal = ({ isOpen, onClose, onDontShowAgain, showDontShowAgain 
   const bottomPixels = generatePixels(64);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
       onClick={handleOverlayClick}
     >
@@ -119,7 +119,7 @@ export const InfoModal = ({ isOpen, onClose, onDontShowAgain, showDontShowAgain 
 
         {/* Shadow effect */}
         <div className="absolute -bottom-1 -right-1 w-full h-full bg-black opacity-30 translate-x-1 translate-y-1 -z-10"></div>
-        
+
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -128,23 +128,23 @@ export const InfoModal = ({ isOpen, onClose, onDontShowAgain, showDontShowAgain 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        
+
         <div className="prose">
           <p className="text-xl font-bold text-center" style={{ fontFamily: tektur.style.fontFamily }}>
-            🎮 Welcome to AlignEval! 🎮 
+            🎮 Welcome to AlignEval! 🎮
           </p>
-          <br/>
+          <br />
           <p>
             AlignEval is a <strong>game/tool</strong> to help you build and optimize LLM-evaluators. We do so by <span className="relative">
               <span className="relative">aligning annotators to AI output</span>
-              <span className="absolute bottom-[-5px] left-0 w-full h-[4px]" style={{ 
+              <span className="absolute bottom-[-5px] left-0 w-full h-[4px]" style={{
                 background: '#ff0000',
                 transform: 'rotate(-0.5deg) skew(-30deg)',
                 opacity: 0.9
               }}></span>
             </span>, and <span className="relative">
               <span className="relative">aligning AI to annotator input</span>
-              <span className="absolute bottom-[-5px] left-0 w-full h-[4px]" style={{ 
+              <span className="absolute bottom-[-5px] left-0 w-full h-[4px]" style={{
                 background: '#ff0000',
                 transform: 'rotate(0.7deg) skew(45deg)',
                 opacity: 0.9
@@ -154,7 +154,7 @@ export const InfoModal = ({ isOpen, onClose, onDontShowAgain, showDontShowAgain 
           <p className="mt-4 mb-2">
             To progress, gain XP by adding labels while you <strong>look at your data</strong>.
           </p>
-          
+
           <ol className="list-decimal pl-5 space-y-2">
             <li>
               <strong>🐣 Upload:</strong> Initialize your character by uploading a csv containing input-output pairs. Having existing labels counts towards your XP!
@@ -236,7 +236,7 @@ export const InfoModalMobile = ({ isOpen, onClose, onDontShowAgain, showDontShow
   const bottomPixels = generatePixels(64);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
       onClick={handleOverlayClick}
     >
@@ -299,7 +299,7 @@ export const InfoModalMobile = ({ isOpen, onClose, onDontShowAgain, showDontShow
 
         {/* Shadow effect */}
         <div className="absolute -bottom-1 -right-1 w-full h-full bg-black opacity-30 translate-x-1 translate-y-1 -z-10"></div>
-        
+
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -308,23 +308,23 @@ export const InfoModalMobile = ({ isOpen, onClose, onDontShowAgain, showDontShow
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        
+
         <div className="prose prose-sm">
           <p className="text-lg font-bold text-center" style={{ fontFamily: tektur.style.fontFamily }}>
-            🎮 Welcome to ALIGN Eval! 🎮 
+            🎮 Welcome to ALIGN Eval! 🎮
           </p>
-          <br/>
+          <br />
           <p className="text-sm">
             ALIGN Eval is a <strong>game</strong> to help you build and optimize LLM-evaluators. We do so by <span className="relative">
               <span className="relative">aligning annotators to AI output</span>
-              <span className="absolute bottom-[-3px] left-0 w-full h-[3px]" style={{ 
+              <span className="absolute bottom-[-3px] left-0 w-full h-[3px]" style={{
                 background: '#ff0000',
                 transform: 'rotate(-0.5deg) skew(-30deg)',
                 opacity: 0.9
               }}></span>
             </span>, and <span className="relative">
               <span className="relative">aligning AI to annotator input</span>
-              <span className="absolute bottom-[-3px] left-0 w-full h-[3px]" style={{ 
+              <span className="absolute bottom-[-3px] left-0 w-full h-[3px]" style={{
                 background: '#ff0000',
                 transform: 'rotate(0.7deg) skew(45deg)',
                 opacity: 0.9
@@ -334,7 +334,7 @@ export const InfoModalMobile = ({ isOpen, onClose, onDontShowAgain, showDontShow
           <p className="mt-3 mb-2 text-sm">
             To progress, gain XP by adding labels while you <strong>look at your data</strong>.
           </p>
-          
+
           <ol className="list-decimal pl-4 space-y-1 text-sm">
             <li>
               <strong>🐣 Upload:</strong> Initialize your character by uploading a csv containing input-output pairs.
@@ -378,13 +378,13 @@ export const InfoModalMobile = ({ isOpen, onClose, onDontShowAgain, showDontShow
 };
 
 export const CsvUploadInstructions = () => {
-  
+
   const handleDownloadSample = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const fileName = prompt('Please name the sample csv for download:', '.csv');
-    
+
     if (!fileName) return; // User cancelled
-    
+
     // Create a temporary link and trigger the download with the custom filename
     const link = document.createElement('a');
     link.href = '/data/fib50.csv';
@@ -415,15 +415,15 @@ export const CsvUploadInstructions = () => {
         </li>
         <li>🚫 <strong>Character XP limit</strong>: Only the first {MAX_UPLOAD_ROWS} rows will be uploaded and considered for XP.</li>
         <li>
-          🎁 <strong>Starter pack</strong>: <a 
-            href="#" 
+          🎁 <strong>Starter pack</strong>: <a
+            href="#"
             onClick={handleDownloadSample}
             className="text-blue-600 hover:text-blue-800 underline"
           >
             Download a partially labeled CSV
-          </a> from the Factual Inconsistency Benchmark (<a 
-            href="https://huggingface.co/datasets/r-three/fib" 
-            className="text-blue-600 hover:text-blue-800 underline" 
+          </a> from the Factual Inconsistency Benchmark (<a
+            href="https://huggingface.co/datasets/r-three/fib"
+            className="text-blue-600 hover:text-blue-800 underline"
             target="_blank"
           >
             details
@@ -450,7 +450,7 @@ export const LabelingModeInstructions = ({ labeledCount, minLabelsRequired }: La
         <strong>Current XP:</strong> {labeledCount} / {minLabelsRequired}
       </p>
       <div className="w-full bg-yellow-200 rounded-full h-4 border border-yellow-300">
-        <div 
+        <div
           className="bg-yellow-500 h-full rounded-full transition-all duration-500"
           style={{ width: `${Math.min((labeledCount / minLabelsRequired) * 100, 100)}%` }}
         ></div>
@@ -476,13 +476,13 @@ export const EvaluationModeInstructions = ({ minLabelsForOptimization }: Evaluat
       <p>
         🎉 <strong>Achievement Unlocked:</strong> You can now cast the <strong>&quot;Evaluate&quot;</strong> spell!
       </p>
-      
+
       <div className="bg-green-50 p-3 rounded-lg">
         <p className="font-bold mb-2">⚗️ Spell Preparation:</p>
         <ul className="list-disc pl-5 space-y-2">
           <li>📝 Write your evaluation prompt based on what you&apos;ve seen in the data</li>
           <li> ⚖️ The prompt should focus on a single aspect and return 0 (pass) or 1 (fail)</li>
-          <li>🦉 Choose your magical companion: gpt-4o-mini or claude-3-haiku</li>
+          <li>🦉 Choose your magical companion: GigaChat-2-Max, gpt-4o-mini, or claude-3-haiku</li>
           <li>🍄 Choose your evaluation strategy: Input and Output, or Output Only</li>
           <li>💥 Cast <strong>&quot;Evaluate&quot;</strong> to begin assessing your spell!</li>
         </ul>
@@ -505,9 +505,9 @@ export const OptimizationModeInstructions = () => (
     <h2 className="font-bold mb-2 text-2xl" style={{ fontFamily: tektur.style.fontFamily }}>🧙 Optimization Master - Arcane Sanctum</h2>
     <div className="space-y-3">
       <p>
-       🎉 <strong>Legendary Achievement Unlocked:</strong> You can now cast the <strong>&quot;Optimize&quot;</strong> spell!
+        🎉 <strong>Legendary Achievement Unlocked:</strong> You can now cast the <strong>&quot;Optimize&quot;</strong> spell!
       </p>
-      
+
       <div className="bg-blue-50 p-3 rounded-lg">
         <ul className="list-disc pl-5 space-y-2">
           <li>⚙️ Your evaluator prompt will be optimized by ancient AI wisdom</li>

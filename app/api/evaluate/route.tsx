@@ -1,9 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
-import OpenAI from 'openai';
-import type { InputOutput } from '@/app/lib/definitions';
-import { fetchInputOutput, fetchExplanationPrediction } from '@/app/lib/data';
-import { NextResponse } from 'next/server';
 import { insertExplanationPrediction } from '@/app/lib/actions';
+import { fetchExplanationPrediction, fetchInputOutput } from '@/app/lib/data';
+import type { InputOutput } from '@/app/lib/definitions';
+import Anthropic from '@anthropic-ai/sdk';
+import GigaChat from 'gigachat';
+import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
@@ -33,6 +34,32 @@ try {
   throw error;
 }
 
+// Initialize GigaChat client
+let gigachat: GigaChat;
+try {
+  // const gigachatCredentials = process.env.GIGACHAT_CREDENTIALS;
+  // if (!gigachatCredentials) {
+  //   throw new Error('GIGACHAT_CREDENTIALS is missing');
+  // }
+
+  // Import https Agent for certificate handling
+  const https = require('node:https');
+
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: false, // Отключает проверку корневого сертификата
+  });
+
+  gigachat = new GigaChat({
+    // credentials: gigachatCredentials,
+    model: 'GigaChat-2-Max',
+    timeout: 600,
+    httpsAgent: httpsAgent,
+  });
+} catch (error) {
+  console.error('Error initializing GigaChat client:', error);
+  throw error;
+}
+
 let isEvaluationRunning = false;
 const anthropicModel = process.env.ANTHROPIC_HAIKU3 || 'claude-3-haiku-20240307';
 const openaiModel = process.env.OPENAI_4O_MINI || 'gpt-4o-mini';
@@ -44,7 +71,7 @@ const EvaluationResponse = z.object({
 
 function createClaudePromptContent(userPrompt: string, inputData: string, outputData: string, evaluationFields: 'inputAndOutput' | 'outputOnly') {
   const inputSection = evaluationFields === 'inputAndOutput' ? `<input>${inputData}</input>` : '';
-  
+
   return `${userPrompt}
 
 ${inputSection}
@@ -55,37 +82,21 @@ Evaluate the output based on the provided criteria. First, in the <sketchpad> pr
 Then, provide a binary prediction (0 or 1) within <prediction>.`;
 }
 
-function extractContent(text: string, tag: string): string {
-  const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, 's')
-  const match = text.match(regex)
-  return match ? match[1].trim() : ''
-}
+function createGigaChatPromptContent(userPrompt: string, inputData: string, outputData: string, evaluationFields: 'inputAndOutput' | 'outputOnly') {
+  const inputSection = evaluationFields === 'inputAndOutput' ? `Input: ${inputData}\n\n` : '';
 
-async function processRowViaClaude(prompt: string, row: InputOutput, evaluationFields: 'inputAndOutput' | 'outputOnly', fileName: string) {
-  const promptContent = createClaudePromptContent(prompt, row.input, row.output, evaluationFields)
-  
-  const response = await anthropic.messages.create({
-    model: anthropicModel,
-    max_tokens: 1000,
-    messages: [
-      { role: 'user', content: promptContent },
-      { role: 'assistant', content: '<sketchpad>' },
-    ],
-  })
+  return `${userPrompt}
 
-  const content = response.content[0].type === 'text' 
-    ? `<sketchpad>${response.content[0].text}`
-    : '<sketchpad></sketchpad>'
-  const explanation = extractContent(content, 'sketchpad')
-  const prediction = extractContent(content, 'prediction')
-  console.log(`Claude response: ${explanation.slice(0, 40)}... ${prediction}`)
+${inputSection}Output: ${outputData}
 
-  await insertExplanationPrediction(fileName, row.id, explanation, prediction);
+Evaluate the output based on the provided criteria. First, think through your evaluation step by step and provide your reasoning.
+
+Then, provide a binary prediction (0 or 1) at the end of your response.`;
 }
 
 function createGptPromptContent(userPrompt: string, inputData: string, outputData: string, evaluationFields: 'inputAndOutput' | 'outputOnly') {
   const inputSection = evaluationFields === 'inputAndOutput' ? `${inputData}` : '';
-  
+
   return {
     systemPrompt: `${userPrompt}
 
@@ -96,9 +107,58 @@ Then, provide a binary prediction (0 or 1) in the json response as the predictio
   };
 }
 
+function extractContent(text: string, tag: string): string {
+  const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, 's')
+  const match = text.match(regex)
+  return match ? match[1].trim() : ''
+}
+
+async function processRowViaClaude(prompt: string, row: InputOutput, evaluationFields: 'inputAndOutput' | 'outputOnly', fileName: string) {
+  const promptContent = createClaudePromptContent(prompt, row.input, row.output, evaluationFields)
+
+  const response = await anthropic.messages.create({
+    model: anthropicModel,
+    max_tokens: 1000,
+    messages: [
+      { role: 'user', content: promptContent },
+      { role: 'assistant', content: '<sketchpad>' },
+    ],
+  })
+
+  const content = response.content[0].type === 'text'
+    ? `<sketchpad>${response.content[0].text}`
+    : '<sketchpad></sketchpad>'
+  const explanation = extractContent(content, 'sketchpad')
+  const prediction = extractContent(content, 'prediction')
+  console.log(`Claude response: ${explanation.slice(0, 40)}... ${prediction}`)
+
+  await insertExplanationPrediction(fileName, row.id, explanation, prediction);
+}
+
+async function processRowViaGigaChat(prompt: string, row: InputOutput, evaluationFields: 'inputAndOutput' | 'outputOnly', fileName: string) {
+  const promptContent = createGigaChatPromptContent(prompt, row.input, row.output, evaluationFields)
+
+  const response = await gigachat.chat({
+    messages: [{ role: 'user', content: promptContent }],
+  });
+
+  const content = response.choices[0]?.message.content || '';
+
+  // Extract prediction from the end of the response
+  const predictionMatch = content.match(/(?:prediction|result|answer):?\s*(0|1)/i);
+  const prediction = predictionMatch ? predictionMatch[1] : '0';
+
+  // Remove the prediction from the explanation
+  const explanation = content.replace(/(?:prediction|result|answer):?\s*(0|1)/i, '').trim();
+
+  console.log(`GigaChat response: ${explanation.slice(0, 40)}... ${prediction}`)
+
+  await insertExplanationPrediction(fileName, row.id, explanation, prediction);
+}
+
 async function processRowViaGpt(prompt: string, row: InputOutput, evaluationFields: 'inputAndOutput' | 'outputOnly', fileName: string) {
   const { systemPrompt, userPrompt } = createGptPromptContent(prompt, row.input, row.output, evaluationFields)
-  
+
   const completion = await openai.beta.chat.completions.parse({
     model: openaiModel,
     messages: [
@@ -120,9 +180,24 @@ async function processRowViaGpt(prompt: string, row: InputOutput, evaluationFiel
   await insertExplanationPrediction(fileName, row.id, result.explanation, result.prediction.toString());
 }
 
-async function processRows(prompt: string, data: InputOutput[], evaluationFields: 'inputAndOutput' | 'outputOnly', fileName: string, model: 'claude-3-haiku-20240307' | 'gpt-4o-mini') {
-  const processRow = model === 'claude-3-haiku-20240307' ? processRowViaClaude : processRowViaGpt;
-  
+async function processRows(prompt: string, data: InputOutput[], evaluationFields: 'inputAndOutput' | 'outputOnly', fileName: string, model: 'claude-3-haiku-20240307' | 'claude-3-5-haiku-20241022' | 'gpt-4o-mini' | 'GigaChat-2-Max') {
+  let processRow;
+
+  switch (model) {
+    case 'claude-3-haiku-20240307':
+    case 'claude-3-5-haiku-20241022':
+      processRow = processRowViaClaude;
+      break;
+    case 'gpt-4o-mini':
+      processRow = processRowViaGpt;
+      break;
+    case 'GigaChat-2-Max':
+      processRow = processRowViaGigaChat;
+      break;
+    default:
+      processRow = processRowViaGigaChat; // Default to GigaChat
+  }
+
   for (const row of data) {
     if (!isEvaluationRunning) break;
     try {
@@ -179,12 +254,12 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const fileName = searchParams.get('fileName')
-  
+
   if (!fileName) {
     return NextResponse.json({ error: 'File name is required' }, { status: 400 })
   }
 
-  
+
   const results = await fetchExplanationPrediction(fileName);
   return NextResponse.json({ results, isEvaluationRunning }, { status: 200 })
 }
